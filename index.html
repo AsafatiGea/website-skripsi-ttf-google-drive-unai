@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Portal Penelitian TTF Google Drive UNAI</title>
+  <meta name="description" content="Portal penelitian dan dashboard interaktif: Analisis Penggunaan Fitur Google Drive oleh Mahasiswa UNAI Menggunakan Model TTF (Task-Technology Fit)." />
+  <meta name="theme-color" content="#0b1b3a" />
+  <meta name="citation_title" content="Analisis penggunaan fitur Google Drive oleh mahasiswa UNAI menggunakan model TTF (Task-Technology Fit)" />
+  <meta name="citation_author" content="Gea, Asafati" />
+  <meta name="citation_author" content="Limbong, Albinur" />
+  <meta name="citation_publication_date" content="2026" />
+  <meta name="citation_dissertation_institution" content="Universitas Advent Indonesia" />
+  <meta name="citation_technical_report_institution" content="Program Studi Sistem Informasi, Fakultas Teknologi Informasi, Universitas Advent Indonesia" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231e3a8a'/%3E%3Cpath d='M9 22l4-12h6l4 12z' fill='none' stroke='white' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E" />
+
+  <!-- Tailwind CSS (CDN) -->
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script>
+    // Mode gelap berbasis class "dark" pada <html>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui', 'Segoe UI', 'Roboto', 'sans-serif'] },
+          colors: { navy: { 50:'#eff4ff', 100:'#dbe6ff', 200:'#bcd0ff', 300:'#8fb0ff', 400:'#5b86f5', 500:'#3b63e0', 600:'#2a4cc2', 700:'#223e9c', 800:'#1e3a8a', 900:'#14275e', 950:'#0b1b3a' } }
+        }
+      }
+    };
+  </script>
+  <script>
+    // Terapkan tema sebelum halaman tampil (mencegah kedipan putih)
+    (function () {
+      try {
+        var t = localStorage.getItem('tema-portal');
+        var dark = t ? t === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (dark) document.documentElement.classList.add('dark');
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+    body { font-family: 'Inter', ui-sans-serif, system-ui, 'Segoe UI', Roboto, sans-serif; }
+    section[id] { scroll-margin-top: 6rem; }               /* judul tidak tertutup navbar */
+    .node { cursor: pointer; outline: none; }
+    .node rect.box { transition: stroke .15s, stroke-width .15s, filter .15s; }
+    .node:hover rect.box, .node:focus-visible rect.box { filter: drop-shadow(0 6px 10px rgba(30,58,138,.28)); }
+    .node[data-active="true"] rect.box { stroke: #3b82f6; stroke-width: 4; }
+    .stat-card { transition: box-shadow .25s ease, transform .25s ease, border-color .25s ease; }
+    .stat-card:hover { box-shadow: 0 10px 28px -8px rgba(30,58,138,.28); transform: translateY(-2px); }
+    .dark .stat-card:hover { box-shadow: 0 10px 28px -8px rgba(0,0,0,.6); }
+    mark { background: #fde68a; color: #0f172a; border-radius: 3px; padding: 0 2px; }
+    .chart-box { position: relative; height: 18rem; }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .stat-card, .node rect.box { transition: none; }
+      .stat-card:hover { transform: none; }
+    }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    .fade-up { animation: fadeUp .35s ease both; }
+    .acc-panel { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .25s ease; }
+    .acc-panel[data-open="true"] { grid-template-rows: 1fr; }
+    .acc-panel > div { overflow: hidden; }
+    :focus-visible { outline: 2px solid #3b82f6; outline-offset: 2px; }
+  </style>
+</head>
+
+<body class="bg-slate-50 text-slate-800 antialiased dark:bg-slate-950 dark:text-slate-200 transition-colors duration-200">
+
+  <a href="#konten" class="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[60] focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-navy-800 focus:shadow">Lewati ke konten</a>
+
+  <!-- ============ NAVBAR (fixed, z-50) ============ -->
+  <header class="fixed inset-x-0 top-0 z-50 border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/95">
+    <nav class="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8" aria-label="Navigasi utama">
+      <a href="#beranda" class="flex min-w-0 items-center gap-2.5 font-bold text-navy-900 dark:text-white">
+        <span class="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-navy-800 text-white"><i data-lucide="graduation-cap" class="h-5 w-5"></i></span>
+        <span class="truncate text-sm sm:text-base">Portal Penelitian <span class="text-navy-600 dark:text-blue-400">TTF</span></span>
+      </a>
+
+      <ul class="hidden items-center gap-1 lg:flex" id="menu-desktop"></ul>
+
+      <div class="flex items-center gap-2">
+        <button id="btn-tema" type="button" aria-label="Ganti mode terang atau gelap" title="Ganti mode terang/gelap"
+          class="grid h-10 w-10 place-items-center rounded-lg border border-slate-200 text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">
+          <i data-lucide="moon" class="h-5 w-5 dark:hidden"></i>
+          <i data-lucide="sun" class="hidden h-5 w-5 dark:block"></i>
+        </button>
+        <button id="btn-menu" type="button" aria-label="Buka menu" aria-expanded="false" aria-controls="menu-mobile"
+          class="grid h-10 w-10 place-items-center rounded-lg border border-slate-200 text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800 lg:hidden">
+          <i data-lucide="menu" class="h-5 w-5"></i>
+        </button>
+      </div>
+    </nav>
+    <div id="menu-mobile" class="hidden border-t border-slate-200 bg-white px-4 pb-4 pt-2 dark:border-slate-800 dark:bg-slate-900 lg:hidden">
+      <ul class="grid grid-cols-2 gap-1 sm:grid-cols-3" id="menu-mobile-list"></ul>
+    </div>
+  </header>
+
+  <main id="konten">
+
+    <!-- ============ HERO ============ -->
+    <section id="beranda" class="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950 pt-28 pb-16 text-white sm:pt-32 sm:pb-20">
+      <div class="pointer-events-none absolute inset-0 opacity-30" style="background-image:radial-gradient(circle at 20% 20%,rgba(59,130,246,.35),transparent 45%),radial-gradient(circle at 85% 70%,rgba(99,102,241,.3),transparent 40%)"></div>
+      <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-wrap items-center gap-2 text-xs font-semibold sm:text-sm">
+          <span class="inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-white/10 px-3 py-1"><i data-lucide="calendar" class="h-3.5 w-3.5"></i> Semester Ganjil 2026/2027</span>
+          <span class="inline-flex items-center gap-1.5 rounded-full border border-amber-300/40 bg-amber-400/15 px-3 py-1 text-amber-200"><i data-lucide="hourglass" class="h-3.5 w-3.5"></i> Tahap proposal: data empiris belum dikumpulkan</span>
+        </div>
+
+        <h1 class="mt-5 max-w-4xl text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl lg:text-5xl">
+          Analisis Penggunaan Fitur Google Drive oleh Mahasiswa UNAI Menggunakan Model TTF <span class="text-blue-300">(Task-Technology Fit)</span>
+        </h1>
+        <p class="mt-3 max-w-3xl text-sm italic text-blue-100/80 sm:text-base">Analysis of Google Drive Feature Usage among UNAI Students Using the Task-Technology Fit (TTF) Model</p>
+
+        <div class="mt-8 grid max-w-3xl gap-3 sm:grid-cols-2">
+          <div class="rounded-xl border border-white/15 bg-white/10 p-4 backdrop-blur">
+            <p class="text-xs uppercase tracking-wide text-blue-200">Penulis 1</p>
+            <p class="mt-1 font-semibold">Asafati Gea</p>
+            <a class="break-all text-sm text-blue-200 hover:underline" href="mailto:2382006@unai.edu">2382006@unai.edu</a>
+          </div>
+          <div class="rounded-xl border border-white/15 bg-white/10 p-4 backdrop-blur">
+            <p class="text-xs uppercase tracking-wide text-blue-200">Penulis 2</p>
+            <p class="mt-1 font-semibold">Albinur Limbong</p>
+            <a class="break-all text-sm text-blue-200 hover:underline" href="mailto:alimbong@unai.edu">alimbong@unai.edu</a>
+          </div>
+        </div>
+        <p class="mt-4 max-w-3xl text-sm text-blue-100/90">Program Studi Sistem Informasi, Fakultas Teknologi Informasi, Universitas Advent Indonesia (UNAI)</p>
+
+        <div class="mt-8 flex flex-wrap gap-3">
+          <a href="#model" class="inline-flex items-center gap-2 rounded-lg bg-white px-5 py-3 text-sm font-semibold text-navy-900 shadow transition hover:bg-blue-50"><i data-lucide="workflow" class="h-4 w-4"></i> Jelajahi model TTF</a>
+          <a href="#dashboard" class="inline-flex items-center gap-2 rounded-lg border border-white/30 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"><i data-lucide="bar-chart-3" class="h-4 w-4"></i> Lihat dashboard</a>
+          <a href="#sitasi" class="inline-flex items-center gap-2 rounded-lg border border-white/30 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"><i data-lucide="quote" class="h-4 w-4"></i> Sitasi &amp; naskah</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ RINGKASAN + KPI ============ -->
+    <section id="ringkasan" class="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
+      <div id="kpi" class="relative z-10 -mt-24 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4"></div>
+
+      <div class="mt-12 grid gap-8 lg:grid-cols-5">
+        <div class="lg:col-span-3">
+          <h2 class="text-2xl font-bold text-navy-900 dark:text-white sm:text-3xl">Ringkasan Penelitian</h2>
+          <p class="mt-4 leading-relaxed text-slate-700 dark:text-slate-300">Google Drive digunakan oleh mahasiswa untuk menyimpan, membagikan, dan mengelola dokumen perkuliahan, termasuk dalam pengerjaan tugas kelompok. Namun, ketersediaan fitur teknologi tidak selalu menjamin kesesuaiannya dengan kebutuhan tugas akademik. Penelitian ini bertujuan menganalisis pengaruh Karakteristik Tugas dan Karakteristik Teknologi terhadap Task-Technology Fit (TTF), pengaruh TTF terhadap Pemanfaatan (Utilization), serta pengaruh Pemanfaatan terhadap Kepuasan Pengguna (User Satisfaction) dalam penggunaan Google Drive untuk kegiatan akademik mahasiswa Universitas Advent Indonesia (UNAI).</p>
+          <p class="mt-4 leading-relaxed text-slate-700 dark:text-slate-300">Penelitian menggunakan pendekatan kuantitatif dengan pengumpulan data melalui kuesioner berskala Likert. Data direncanakan dianalisis menggunakan IBM SPSS Statistics melalui statistik deskriptif, uji validitas dan reliabilitas instrumen, serta regresi linear berdasarkan skor komposit variabel.</p>
+          <div class="mt-5 flex flex-wrap gap-2 text-xs font-medium">
+            <span class="rounded-full bg-navy-50 px-3 py-1 text-navy-800 dark:bg-slate-800 dark:text-blue-300">Google Drive</span>
+            <span class="rounded-full bg-navy-50 px-3 py-1 text-navy-800 dark:bg-slate-800 dark:text-blue-300">Task-Technology Fit</span>
+            <span class="rounded-full bg-navy-50 px-3 py-1 text-navy-800 dark:bg-slate-800 dark:text-blue-300">mahasiswa</span>
+            <span class="rounded-full bg-navy-50 px-3 py-1 text-navy-800 dark:bg-slate-800 dark:text-blue-300">SPSS</span>
+            <span class="rounded-full bg-navy-50 px-3 py-1 text-navy-800 dark:bg-slate-800 dark:text-blue-300">kepuasan pengguna</span>
+          </div>
+        </div>
+        <aside class="lg:col-span-2">
+          <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <h3 class="flex items-center gap-2 font-semibold text-navy-900 dark:text-white"><i data-lucide="clipboard-list" class="h-5 w-5 text-navy-600 dark:text-blue-400"></i> Rancangan singkat</h3>
+            <dl class="mt-4 space-y-3 text-sm">
+              <div class="flex justify-between gap-4"><dt class="text-slate-500 dark:text-slate-400">Pendekatan</dt><dd class="text-right font-medium">Kuantitatif eksplanatori</dd></div>
+              <div class="flex justify-between gap-4"><dt class="text-slate-500 dark:text-slate-400">Desain</dt><dd class="text-right font-medium">Potong lintang (cross-sectional)</dd></div>
+              <div class="flex justify-between gap-4"><dt class="text-slate-500 dark:text-slate-400">Instrumen</dt><dd class="text-right font-medium">Kuesioner Likert 1–5, 20 butir</dd></div>
+              <div class="flex justify-between gap-4"><dt class="text-slate-500 dark:text-slate-400">Pengumpulan data</dt><dd class="text-right font-medium">Google Forms (daring)</dd></div>
+              <div class="flex justify-between gap-4"><dt class="text-slate-500 dark:text-slate-400">Analisis</dt><dd class="text-right font-medium">IBM SPSS, regresi linear</dd></div>
+              <div class="flex justify-between gap-4"><dt class="text-slate-500 dark:text-slate-400">Model adaptasi</dt><dd class="text-right font-medium">Laeni et al. (2024)</dd></div>
+            </dl>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ============ METODOLOGI + KALKULATOR SLOVIN ============ -->
+    <section id="metodologi" class="border-y border-slate-200 bg-white py-14 dark:border-slate-800 dark:bg-slate-900/60 sm:py-16">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <h2 class="text-2xl font-bold text-navy-900 dark:text-white sm:text-3xl">Metodologi Sampel</h2>
+        <p class="mt-2 max-w-3xl text-slate-600 dark:text-slate-400">Populasi, kriteria responden, dan perkiraan ukuran sampel dengan rumus Slovin.</p>
+
+        <div class="mt-8 grid gap-6 lg:grid-cols-2">
+          <div class="rounded-2xl border border-slate-200 bg-slate-50 p-6 dark:border-slate-800 dark:bg-slate-900">
+            <h3 class="flex items-center gap-2 text-lg font-semibold text-navy-900 dark:text-white"><i data-lucide="users" class="h-5 w-5 text-navy-600 dark:text-blue-400"></i> Populasi &amp; teknik sampling</h3>
+            <p class="mt-3 text-sm leading-relaxed text-slate-700 dark:text-slate-300">Populasi penelitian adalah seluruh mahasiswa aktif UNAI pada tahun ajaran 2026/2027 semester ganjil, tercatat <strong>1.511 mahasiswa</strong> berdasarkan informasi bagian akademik. Responden dipilih dengan <strong>purposive sampling</strong> berdasarkan dua kriteria:</p>
+            <ol class="mt-3 list-decimal space-y-1.5 pl-5 text-sm text-slate-700 dark:text-slate-300">
+              <li>Terdaftar sebagai mahasiswa aktif UNAI pada tahun ajaran 2026/2027 semester ganjil.</li>
+              <li>Menggunakan Google Drive untuk kegiatan akademik, seperti menyimpan dokumen perkuliahan, berbagi berkas, atau mengerjakan tugas kelompok.</li>
+            </ol>
+            <p class="mt-3 text-sm leading-relaxed text-slate-700 dark:text-slate-300">Kuesioner disebarkan melalui Google Forms dengan pertanyaan penyaring di awal; partisipasi bersifat sukarela.</p>
+            <div class="mt-4 flex gap-2 rounded-lg border border-amber-300/60 bg-amber-50 p-3 text-xs text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
+              <i data-lucide="info" class="mt-0.5 h-4 w-4 shrink-0"></i>
+              <p>Perhitungan Slovin adalah perkiraan awal target responden, bukan jaminan keterwakilan statistik, karena pemilihan responden memakai purposive sampling.</p>
+            </div>
+          </div>
+
+          <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900" id="kalkulator">
+            <div class="flex items-center justify-between gap-3">
+              <h3 class="flex items-center gap-2 text-lg font-semibold text-navy-900 dark:text-white"><i data-lucide="calculator" class="h-5 w-5 text-navy-600 dark:text-blue-400"></i> Kalkulator Slovin</h3>
+              <button id="slovin-reset" type="button" class="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-navy-800 transition hover:bg-navy-50 dark:border-slate-600 dark:text-blue-300 dark:hover:bg-slate-800">Hitungan jurnal (5%)</button>
+            </div>
+            <p class="mt-3 rounded-lg bg-slate-100 px-3 py-2 font-mono text-sm dark:bg-slate-800">n = N / (1 + N·e²)</p>
+
+            <div class="mt-5">
+              <div class="flex items-end justify-between">
+                <label for="slovin-e" class="text-sm font-medium">Tingkat kesalahan (e)</label>
+                <output id="slovin-e-out" class="text-xl font-bold text-navy-700 dark:text-blue-400">5%</output>
+              </div>
+              <input id="slovin-e" type="range" min="1" max="10" step="0.5" value="5" class="mt-2 h-2 w-full cursor-pointer accent-blue-700" aria-describedby="slovin-hint" />
+              <div class="mt-1 flex justify-between text-xs text-slate-500 dark:text-slate-400"><span>1%</span><span id="slovin-hint">geser untuk simulasi</span><span>10%</span></div>
+            </div>
+
+            <div class="mt-5 space-y-1 rounded-lg bg-slate-50 p-4 font-mono text-xs leading-6 dark:bg-slate-800 sm:text-sm" id="slovin-steps" aria-live="polite"></div>
+
+            <div class="mt-4 flex items-center justify-between rounded-xl bg-navy-800 px-5 py-4 text-white">
+              <div>
+                <p class="text-xs uppercase tracking-wide text-blue-200">Target sampel</p>
+                <p class="text-3xl font-extrabold" id="slovin-n">317</p>
+              </div>
+              <p class="max-w-[10rem] text-right text-xs text-blue-100" id="slovin-note">Sesuai hitungan jurnal: N = 1.511, e = 5%</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ MODEL TTF INTERAKTIF ============ -->
+    <section id="model" class="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
+      <h2 class="text-2xl font-bold text-navy-900 dark:text-white sm:text-3xl">Model Konseptual TTF</h2>
+      <p class="mt-2 max-w-3xl text-slate-600 dark:text-slate-400">Lima variabel dan empat hipotesis, diadaptasi dari empat hubungan TTF pada Laeni et al. (2024). Klik atau ketuk kotak variabel untuk melihat penjelasan dan persamaan regresinya.</p>
+
+      <div class="mt-8 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
+        <!-- Diagram SVG (layar sedang ke atas) -->
+        <div class="hidden md:block">
+          <svg id="diagram" viewBox="0 0 960 340" class="h-auto w-full" role="group" aria-label="Diagram jalur model TTF">
+            <defs>
+              <marker id="panah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+                <path d="M0 0 L10 5 L0 10 z" class="fill-slate-500 dark:fill-slate-400"></path>
+              </marker>
+            </defs>
+            <g class="stroke-slate-500 dark:stroke-slate-400" stroke-width="2.5" fill="none" marker-end="url(#panah)">
+              <path d="M190 85 C 245 85, 250 160, 300 160"></path>
+              <path d="M190 255 C 245 255, 250 180, 300 180"></path>
+              <path d="M470 170 L 540 170"></path>
+              <path d="M710 170 L 780 170"></path>
+            </g>
+            <g font-size="14" font-weight="700" text-anchor="middle">
+              <g><circle cx="248" cy="104" r="17" class="fill-blue-700"></circle><text x="248" y="109" fill="#fff">H1</text></g>
+              <g><circle cx="248" cy="236" r="17" class="fill-blue-700"></circle><text x="248" y="241" fill="#fff">H2</text></g>
+              <g><circle cx="505" cy="140" r="17" class="fill-blue-700"></circle><text x="505" y="145" fill="#fff">H3</text></g>
+              <g><circle cx="745" cy="140" r="17" class="fill-blue-700"></circle><text x="745" y="145" fill="#fff">H4</text></g>
+            </g>
+            <g id="svg-nodes"></g>
+          </svg>
+        </div>
+
+        <!-- Alur vertikal (HP) -->
+        <div class="md:hidden" id="diagram-mobile"></div>
+
+        <div id="detail-var" class="mt-6 rounded-xl border border-slate-200 bg-slate-50 p-5 dark:border-slate-700 dark:bg-slate-800/60" aria-live="polite"></div>
+      </div>
+
+      <h3 class="mt-12 text-xl font-bold text-navy-900 dark:text-white">Hipotesis Penelitian</h3>
+      <div id="hipotesis" class="mt-4 grid gap-3 sm:grid-cols-2"></div>
+    </section>
+
+    <!-- ============ EXPLORER INSTRUMEN ============ -->
+    <section id="instrumen" class="border-y border-slate-200 bg-white py-14 dark:border-slate-800 dark:bg-slate-900/60 sm:py-16">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <h2 class="text-2xl font-bold text-navy-900 dark:text-white sm:text-3xl">Explorer Instrumen Kuesioner</h2>
+        <p class="mt-2 max-w-3xl text-slate-600 dark:text-slate-400">20 pernyataan berskala Likert lima poin (1 = Sangat Tidak Setuju sampai 5 = Sangat Setuju), sesuai Tabel 2 naskah. Butir diadaptasi dari pengelompokan konstruk Laeni et al. (2024) dan belum dinyatakan tervalidasi; butir akan dievaluasi sebelum pengumpulan data utama.</p>
+
+        <div class="mt-6 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div id="filter-chips" class="flex flex-wrap gap-2" role="group" aria-label="Filter berdasarkan variabel"></div>
+          <div class="relative w-full lg:w-80">
+            <i data-lucide="search" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"></i>
+            <input id="cari" type="search" placeholder="Cari kata kunci butir…" aria-label="Cari kata kunci pada butir kuesioner"
+              class="w-full rounded-lg border border-slate-300 bg-white py-2.5 pl-9 pr-3 text-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none dark:border-slate-600 dark:bg-slate-800 dark:placeholder:text-slate-500" />
+          </div>
+        </div>
+        <p id="jumlah-butir" class="mt-3 text-sm text-slate-500 dark:text-slate-400" aria-live="polite"></p>
+
+        <div class="mt-3 overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700">
+          <div class="hidden grid-cols-[3rem_9rem_14rem_1fr] gap-4 bg-navy-900 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-white md:grid">
+            <span>No.</span><span>Variabel</span><span>Indikator</span><span>Pernyataan kuesioner</span>
+          </div>
+          <div id="tabel-butir" class="divide-y divide-slate-200 dark:divide-slate-700"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ DASHBOARD ============ -->
+    <section id="dashboard" class="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h2 class="text-2xl font-bold text-navy-900 dark:text-white sm:text-3xl">Dashboard Analisis SPSS</h2>
+          <p class="mt-2 max-w-3xl text-slate-600 dark:text-slate-400">Tiga grafik di bawah memakai data contoh agar tata letak dapat dilihat sebelum pengolahan SPSS selesai.</p>
+        </div>
+        <span id="status-data" class="inline-flex w-fit items-center gap-2 rounded-full border border-amber-400/60 bg-amber-50 px-4 py-1.5 text-xs font-semibold text-amber-900 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200"></span>
+      </div>
+
+      <div id="banner-simulasi" class="mt-5 flex gap-3 rounded-xl border border-amber-300/70 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-100">
+        <i data-lucide="alert-triangle" class="mt-0.5 h-5 w-5 shrink-0"></i>
+        <p><strong>Angka pada grafik dan tabel ini bukan hasil penelitian.</strong> Nilai hanyalah contoh simulasi untuk menunjukkan tampilan. Hasil empiris akan dilaporkan setelah pengumpulan dan analisis data selesai, dan tidak boleh dikutip dari halaman ini selama status masih simulasi.</p>
+      </div>
+
+      <div class="mt-6 grid gap-5 lg:grid-cols-2">
+        <figure class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <figcaption class="font-semibold text-navy-900 dark:text-white">Skor rata-rata lima variabel <span class="text-xs font-normal text-slate-500">(skala 1–5)</span></figcaption>
+          <div class="chart-box mt-3"><canvas id="grafik-rata" role="img" aria-label="Grafik batang skor rata-rata lima variabel (data simulasi)"></canvas></div>
+        </figure>
+        <figure class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <figcaption class="font-semibold text-navy-900 dark:text-white">Reliabilitas Cronbach’s Alpha per variabel <span class="text-xs font-normal text-slate-500">(batas ≥ 0,70)</span></figcaption>
+          <div class="chart-box mt-3"><canvas id="grafik-alpha" role="img" aria-label="Grafik radar Cronbach's Alpha lima variabel (data simulasi)"></canvas></div>
+        </figure>
+        <figure class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 lg:col-span-2">
+          <figcaption class="font-semibold text-navy-900 dark:text-white">Perbandingan R² tiga persamaan regresi</figcaption>
+          <div class="chart-box mt-3 !h-64"><canvas id="grafik-r2" role="img" aria-label="Grafik batang R kuadrat tiga persamaan regresi (data simulasi)"></canvas></div>
+        </figure>
+      </div>
+
+      <div class="mt-8 grid gap-5 lg:grid-cols-2">
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <h3 class="font-semibold text-navy-900 dark:text-white">Persamaan regresi (skor komposit)</h3>
+          <ul class="mt-3 space-y-2 font-mono text-sm">
+            <li class="rounded-lg bg-slate-100 px-3 py-2 dark:bg-slate-800"><span class="text-xs text-slate-500">(1) berganda</span><br />TTF = α₁ + β₁(TSK) + β₂(TEC) + ε₁</li>
+            <li class="rounded-lg bg-slate-100 px-3 py-2 dark:bg-slate-800"><span class="text-xs text-slate-500">(2) sederhana</span><br />UTL = α₂ + β₃(TTF) + ε₂</li>
+            <li class="rounded-lg bg-slate-100 px-3 py-2 dark:bg-slate-800"><span class="text-xs text-slate-500">(3) sederhana</span><br />US = α₃ + β₄(UTL) + ε₃</li>
+          </ul>
+          <p class="mt-3 text-xs text-slate-500 dark:text-slate-400">α = konstanta, β = koefisien regresi, ε = galat model. H1 dan H2 diuji dengan uji t pada persamaan 1 (uji F menilai pengaruh simultan); H3 dan H4 diuji dengan uji t pada persamaan 2 dan 3.</p>
+        </div>
+
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <h3 class="font-semibold text-navy-900 dark:text-white">Kriteria uji</h3>
+          <dl class="mt-3 space-y-3 text-sm">
+            <div class="flex gap-3"><i data-lucide="check-circle-2" class="mt-0.5 h-4 w-4 shrink-0 text-blue-600 dark:text-blue-400"></i><div><dt class="font-medium">Validitas</dt><dd class="text-slate-600 dark:text-slate-400">Korelasi Pearson butir terhadap skor total variabel, positif dan signifikan (p &lt; 0,05).</dd></div></div>
+            <div class="flex gap-3"><i data-lucide="check-circle-2" class="mt-0.5 h-4 w-4 shrink-0 text-blue-600 dark:text-blue-400"></i><div><dt class="font-medium">Reliabilitas</dt><dd class="text-slate-600 dark:text-slate-400">Cronbach’s Alpha per variabel, kriteria awal ≥ 0,70.</dd></div></div>
+            <div class="flex gap-3"><i data-lucide="check-circle-2" class="mt-0.5 h-4 w-4 shrink-0 text-blue-600 dark:text-blue-400"></i><div><dt class="font-medium">Signifikansi</dt><dd class="text-slate-600 dark:text-slate-400">α = 0,05; koefisien signifikan jika p &lt; 0,05.</dd></div></div>
+            <div class="flex gap-3"><i data-lucide="check-circle-2" class="mt-0.5 h-4 w-4 shrink-0 text-blue-600 dark:text-blue-400"></i><div><dt class="font-medium">Asumsi regresi</dt><dd class="text-slate-600 dark:text-slate-400">Linearitas, normalitas residual, homoskedastisitas, dan multikolinearitas (persamaan 1).</dd></div></div>
+          </dl>
+          <p class="mt-3 text-xs text-slate-500 dark:text-slate-400">Hasil ditafsirkan sesuai desain potong lintang dan tidak dianggap bukti kausalitas mutlak.</p>
+        </div>
+      </div>
+
+      <div class="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div class="flex items-center justify-between gap-3 border-b border-slate-200 px-5 py-3 dark:border-slate-800">
+          <h3 class="font-semibold text-navy-900 dark:text-white">Ringkasan uji hipotesis</h3>
+          <span class="rounded bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-900 dark:bg-amber-500/20 dark:text-amber-200" id="tag-uji"></span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full min-w-[34rem] text-left text-sm">
+            <thead class="bg-slate-50 text-xs font-semibold tracking-wide text-slate-500 dark:bg-slate-800/60 dark:text-slate-400">
+              <tr><th class="px-5 py-2.5">Hipotesis</th><th class="px-5 py-2.5">Jalur</th><th class="px-5 py-2.5">β</th><th class="px-5 py-2.5">p-value</th><th class="px-5 py-2.5">Keputusan (α = 0,05)</th></tr>
+            </thead>
+            <tbody id="tabel-uji" class="divide-y divide-slate-200 dark:divide-slate-800"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SITASI & NASKAH ============ -->
+    <section id="sitasi" class="border-y border-slate-200 bg-white py-14 dark:border-slate-800 dark:bg-slate-900/60 sm:py-16">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <h2 class="text-2xl font-bold text-navy-900 dark:text-white sm:text-3xl">Sitasi &amp; Naskah</h2>
+        <div class="mt-6 grid gap-6 lg:grid-cols-5">
+          <div class="rounded-2xl border border-slate-200 bg-slate-50 p-5 dark:border-slate-800 dark:bg-slate-900 lg:col-span-3">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div class="inline-flex rounded-lg border border-slate-300 bg-white p-1 text-sm dark:border-slate-600 dark:bg-slate-800" role="tablist" aria-label="Format sitasi">
+                <button type="button" role="tab" id="tab-apa" aria-selected="true" class="rounded-md px-4 py-1.5 font-semibold">APA</button>
+                <button type="button" role="tab" id="tab-bib" aria-selected="false" class="rounded-md px-4 py-1.5 font-semibold">BibTeX</button>
+              </div>
+              <button id="btn-salin" type="button" class="inline-flex items-center gap-2 rounded-lg bg-navy-800 px-4 py-2 text-sm font-semibold text-white transition hover:bg-navy-700">
+                <i data-lucide="copy" class="h-4 w-4"></i><span id="salin-label">Salin sitasi</span>
+              </button>
+            </div>
+            <pre id="kotak-sitasi" class="mt-4 max-h-64 overflow-auto whitespace-pre-wrap break-words rounded-lg border border-slate-200 bg-white p-4 text-sm leading-relaxed dark:border-slate-700 dark:bg-slate-950" tabindex="0"></pre>
+            <p class="mt-3 text-xs text-slate-500 dark:text-slate-400">Naskah belum dipublikasikan. Perbarui informasi jurnal, volume, dan DOI pada konstanta <code>SITASI</code> setelah terbit.</p>
+          </div>
+
+          <div class="flex flex-col justify-between rounded-2xl border border-slate-200 bg-slate-50 p-5 dark:border-slate-800 dark:bg-slate-900 lg:col-span-2">
+            <div>
+              <h3 class="flex items-center gap-2 font-semibold text-navy-900 dark:text-white"><i data-lucide="file-text" class="h-5 w-5 text-navy-600 dark:text-blue-400"></i> Naskah jurnal</h3>
+              <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">Naskah lengkap dalam format Jurnal TeIKa tersedia setelah proses penelitian dan publikasi selesai.</p>
+            </div>
+            <button id="btn-pdf" type="button" class="mt-5 inline-flex items-center justify-center gap-2 rounded-lg border border-navy-800 px-4 py-3 text-sm font-semibold text-navy-800 transition hover:bg-navy-50 dark:border-blue-400 dark:text-blue-300 dark:hover:bg-slate-800">
+              <i data-lucide="download" class="h-4 w-4"></i> Unduh Naskah Jurnal (PDF)
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ DAFTAR PUSTAKA ============ -->
+    <section id="pustaka" class="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
+      <div class="flex flex-wrap items-end justify-between gap-3">
+        <h2 class="text-2xl font-bold text-navy-900 dark:text-white sm:text-3xl">Daftar Pustaka</h2>
+        <div class="flex gap-2 text-sm">
+          <button id="pustaka-buka" type="button" class="rounded-lg border border-slate-300 px-3 py-1.5 font-medium hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-800">Buka semua</button>
+          <button id="pustaka-tutup" type="button" class="rounded-lg border border-slate-300 px-3 py-1.5 font-medium hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-800">Tutup semua</button>
+        </div>
+      </div>
+      <div id="accordion" class="mt-6 space-y-2"></div>
+    </section>
+  </main>
+
+  <footer class="border-t border-slate-200 bg-white py-8 text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
+    <div class="mx-auto flex max-w-7xl flex-col gap-2 px-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
+      <p>© <span id="tahun"></span> Asafati Gea &amp; Albinur Limbong · Program Studi Sistem Informasi, Fakultas Teknologi Informasi, Universitas Advent Indonesia</p>
+      <a href="#beranda" class="inline-flex items-center gap-1 font-medium text-navy-700 hover:underline dark:text-blue-400"><i data-lucide="arrow-up" class="h-4 w-4"></i> Kembali ke atas</a>
+    </div>
+  </footer>
+
+  <!-- ============ MODAL PDF ============ -->
+  <div id="modal-pdf" class="fixed inset-0 z-[70] hidden items-center justify-center bg-slate-950/70 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="modal-judul">
+    <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl dark:bg-slate-900">
+      <div class="flex items-start gap-3">
+        <span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300"><i data-lucide="hourglass" class="h-5 w-5"></i></span>
+        <div>
+          <h3 id="modal-judul" class="text-lg font-bold text-navy-900 dark:text-white">Naskah belum tersedia</h3>
+          <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Naskah penuh sedang dalam tahap pengumpulan data dan publikasi. Berkas PDF akan disediakan setelah proses tersebut selesai.</p>
+          <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Untuk pertanyaan, hubungi <a class="font-medium text-navy-700 underline dark:text-blue-400" href="mailto:2382006@unai.edu">2382006@unai.edu</a>.</p>
+        </div>
+      </div>
+      <button id="modal-tutup" type="button" class="mt-6 w-full rounded-lg bg-navy-800 px-4 py-2.5 text-sm font-semibold text-white hover:bg-navy-700">Mengerti</button>
+    </div>
+  </div>
+
+  <!-- Chart.js & Lucide (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://unpkg.com/lucide@0.294.0/dist/umd/lucide.min.js"></script>
+
+  <script>
+  /* =====================================================================
+     DATA_PENELITIAN  —  GANTI ANGKA DI SINI SETELAH OLAH DATA SPSS SELESAI
+     ---------------------------------------------------------------------
+     Langkah:
+     1) Setelah data terkumpul dan diolah, isi semua nilai di bawah ini
+        dengan angka dari keluaran SPSS yang sebenarnya.
+     2) Ubah statusSimulasi dari true menjadi false. Label "Simulasi" dan
+        banner peringatan akan hilang otomatis.
+     3) Simpan, lalu push ke GitHub (Vercel akan deploy otomatis).
+     ===================================================================== */
+  const DATA_PENELITIAN = {
+    // true = angka di bawah hanya contoh; false = angka sudah hasil SPSS asli
+    statusSimulasi: true,
+
+    // --- Data dari naskah (tidak perlu diubah kecuali revisi) ---
+    populasi: 1511,          // N: jumlah mahasiswa aktif UNAI
+    errorSlovin: 0.05,       // e: tingkat kesalahan Slovin (5%)
+    totalButir: 20,          // jumlah pernyataan kuesioner
+    tarafSignifikansi: 0.05, // alpha pengujian hipotesis
+    batasAlpha: 0.70,        // batas minimum Cronbach's Alpha
+
+    // --- Skor rata-rata skala Likert 1-5 per variabel (Statistik Deskriptif SPSS) ---
+    rataRata: { TSK: 4.20, TEC: 4.10, TTF: 3.90, UTL: 4.00, US: 3.80 },
+
+    // --- Cronbach's Alpha per variabel (Analyze > Scale > Reliability Analysis) ---
+    cronbachAlpha: { TSK: 0.78, TEC: 0.74, TTF: 0.86, UTL: 0.71, US: 0.82 },
+
+    // --- R Square tiap persamaan (Analyze > Regression > Linear > Model Summary) ---
+    rKuadrat: { persamaan1: 0.42, persamaan2: 0.35, persamaan3: 0.31 },
+
+    // --- Koefisien beta (Unstandardized B) dan p-value (Sig.) tiap hipotesis ---
+    hipotesis: {
+      H1: { beta: 0.31, p: 0.001 },
+      H2: { beta: 0.44, p: 0.000 },
+      H3: { beta: 0.59, p: 0.000 },
+      H4: { beta: 0.56, p: 0.000 }
+    }
+  };
+  /* ================== AKHIR BAGIAN DATA YANG DIGANTI ================== */
+
+  /* ---------- Data tetap dari naskah ---------- */
+  const VARIABEL = {
+    TSK: { nama: 'Karakteristik Tugas', singkat: 'TSK', warna: '#1d4ed8', peran: 'Variabel bebas',
+      deskripsi: 'Menggambarkan kebutuhan dan aktivitas akademik mahasiswa yang harus diselesaikan.',
+      persamaan: 'TTF = α₁ + β₁(TSK) + β₂(TEC) + ε₁  (persamaan 1, regresi berganda)', hipotesis: ['H1'] },
+    TEC: { nama: 'Karakteristik Teknologi', singkat: 'TEC', warna: '#0891b2', peran: 'Variabel bebas',
+      deskripsi: 'Menggambarkan karakteristik fitur Google Drive yang digunakan untuk mendukung aktivitas akademik.',
+      persamaan: 'TTF = α₁ + β₁(TSK) + β₂(TEC) + ε₁  (persamaan 1, regresi berganda)', hipotesis: ['H2'] },
+    TTF: { nama: 'Task-Technology Fit', singkat: 'TTF', warna: '#4f46e5', peran: 'Variabel perantara',
+      deskripsi: 'Menunjukkan kesesuaian antara kebutuhan tugas akademik dan kemampuan fitur Google Drive.',
+      persamaan: 'TTF = α₁ + β₁(TSK) + β₂(TEC) + ε₁ (sebagai terikat);  UTL = α₂ + β₃(TTF) + ε₂ (sebagai prediktor)', hipotesis: ['H1', 'H2', 'H3'] },
+    UTL: { nama: 'Pemanfaatan (Utilization)', singkat: 'UTL', warna: '#0d9488', peran: 'Variabel perantara',
+      deskripsi: 'Menggambarkan penggunaan Google Drive untuk mendukung kegiatan akademik.',
+      persamaan: 'UTL = α₂ + β₃(TTF) + ε₂ (sebagai terikat);  US = α₃ + β₄(UTL) + ε₃ (sebagai prediktor)', hipotesis: ['H3', 'H4'] },
+    US:  { nama: 'Kepuasan Pengguna (User Satisfaction)', singkat: 'US', warna: '#d97706', peran: 'Variabel terikat',
+      deskripsi: 'Menggambarkan tingkat kepuasan mahasiswa terhadap penggunaan Google Drive.',
+      persamaan: 'US = α₃ + β₄(UTL) + ε₃  (persamaan 3, regresi sederhana)', hipotesis: ['H4'] }
+  };
+
+  const HIPOTESIS = [
+    { id: 'H1', dari: 'TSK', ke: 'TTF', teks: 'Karakteristik Tugas (TSK) berpengaruh signifikan terhadap Task-Technology Fit (TTF).', uji: 'Uji t, persamaan 1' },
+    { id: 'H2', dari: 'TEC', ke: 'TTF', teks: 'Karakteristik Teknologi (TEC) berpengaruh signifikan terhadap Task-Technology Fit (TTF).', uji: 'Uji t, persamaan 1' },
+    { id: 'H3', dari: 'TTF', ke: 'UTL', teks: 'Task-Technology Fit (TTF) berpengaruh signifikan terhadap Pemanfaatan (UTL) Google Drive.', uji: 'Uji t, persamaan 2' },
+    { id: 'H4', dari: 'UTL', ke: 'US',  teks: 'Pemanfaatan (UTL) Google Drive berpengaruh signifikan terhadap Kepuasan Pengguna (US).', uji: 'Uji t, persamaan 3' }
+  ];
+
+  /* 20 butir kuesioner (Tabel 2 naskah). Dua salah ketik pada naskah diperbaiki: "berbagi dokumen" menjadi "berbagai dokumen" (no. 1) dan "beerbagi" menjadi "berbagi" (no. 11). */
+  const BUTIR = [
+    [1,'TSK','Kebutuhan penyimpanan digital','Dalam kegiatan akademik, saya perlu menyimpan berbagai dokumen seperti materi kuliah, catatan, dan berkas penting.'],
+    [2,'TSK','Pengelolaan dokumen perkuliahan','Dalam kegiatan akademik, saya perlu mengatur dokumen, seperti mengelompokkan berkas ke dalam folder dan memberikan nama file yang mudah dikenali.'],
+    [3,'TSK','Pertukaran berkas kelompok','Dalam kegiatan akademik, saya perlu membagikan dokumen kepada pihak lain yang membutuhkan dan memiliki izin untuk mengaksesnya.'],
+    [4,'TSK','Pembaruan dokumen','Dalam kegiatan akademik, saya perlu menyimpan dan memperbarui dokumen penting agar dapat digunakan kembali ketika diperlukan.'],
+    [5,'TEC','Keandalan dan ketersediaan fitur penyimpanan','Google Drive menyediakan fitur penyimpanan untuk menyimpan berbagai dokumen akademik yang saya perlukan'],
+    [6,'TEC','Fleksibilitas berbagi berkas','Google Drive menyediakan fitur berbagi dokumen yang memungkinkan saya memberikan akses kepada pihak lain sesuai kebutuhan.'],
+    [7,'TEC','Akses melalui berbagai perangkat','Google Drive memungkinkan saya mengakses dokumen akademik melalui berbagai perangkat yang saya gunakan.'],
+    [8,'TTF','Kualitas dan kesesuaian fitur','Fitur penyimpanan Google Drive sesuai dengan kebutuhan saya dalam menyimpan berbagai dokumen akademik'],
+    [9,'TTF','Pengaturan dokumen tugas','Fitur pengelolaan folder dan berkas pada Google Drive sesuai dengan kebutuhan saya dalam mengatur dokumen akademik'],
+    [10,'TTF','Kemudahan pencarian berkas','Fitur pencarian Google Drive sesuai dengan kebutuhan saya untuk menemukan kembali dokumen akademik yang telah disimpan'],
+    [11,'TTF','Kesesuaian fitur berbagi kelompok','Fitur berbagi Google Drive sesuai dengan kebutuhan saya dalam membagikan dokumen akademik kepada pihak yang berkepentingan.'],
+    [12,'TTF','Pengaturan hak akses','Fitur pengaturan izin akses Google Drive sesuai dengan kebutuhan saya dalam menentukan pihak yang dapat melihat atau mengakses dokumen akademik'],
+    [13,'TTF','Kemudahan kolaborasi','Fitur kolaborasi dokumen yang terintegrasi dengan Google Drive mendukung kebutuhan saya dalam bekerja sama mengelola dokumen akademik'],
+    [14,'TTF','Dukungan penyelesaian tugas','Penggunaan fitur Google Drive yang sesuai dengan kebutuhan saya mendukung pelaksanaan kegiatan akademik'],
+    [15,'TTF','Keandalan sistem','Kemampuan Google Drive dalam menyediakan akses dokumen sesuai dengan kebutuhan saya untuk memperoleh dokumen akademik ketika diperlukan.'],
+    [16,'UTL','Penggunaan untuk dokumen perkuliahan','Saya menggunakan Google Drive untuk menyimpan atau mengelola dokumen dan berkas tugas kuliah.'],
+    [17,'UTL','Penggunaan fitur berbagi dan kolaborasi','Saya menggunakan fitur berbagi Google Drive ketika perlu bertukar dokumen untuk tugas kelompok.'],
+    [18,'US','Kepuasan dalam mendukung tugas','Saya puas menggunakan Google Drive untuk membantu kegiatan dan penyelesaian tugas kuliah.'],
+    [19,'US','Pemenuhan harapan','Penggunaan Google Drive memenuhi harapan saya dalam menyimpan dan mengelola dokumen perkuliahan.'],
+    [20,'US','Kepuasan pengalaman keseluruhan','Secara keseluruhan, saya puas dengan pengalaman menggunakan Google Drive untuk kegiatan perkuliahan.']
+  ].map(function (r) { return { no: r[0], v: r[1], indikator: r[2], teks: r[3] }; });
+
+  const PUSTAKA = [
+    'R. Rifdah dan H. Hindun, “Pemanfaatan Aplikasi Google Drive sebagai Media Pembelajaran di Kalangan Mahasiswa,” Jurnal Ilmu Pendidikan & Sosial (SINOVA), vol. 2, no. 1, pp. 33–40, 2024, doi: 10.71382/sinova.v2i01.64.',
+    'R. N. Zuhra, N. Afifah, N. Yulianti, dan D. Himmawan, “Utilization of Google Drive Use Among Students of the Faculty of Economics, Wiralodra University, Indramayu,” Manajia: Journal of Education and Management, vol. 3, no. 2, pp. 168–176, 2025, doi: 10.58355/manajia.v3i2.46.',
+    'P. P. Pinayungan, M. F. Royhan, J. S. Albaraka, R. A. Sera, dan F. Nopriani, “Usability Measurement of Google Drive as a Data Storage and Collaboration Platform for Information Systems Students,” IONTech Journal, vol. 7, no. 2, pp. 29–42, 2026, doi: 10.62702/iontech.v7i2.185.',
+    'R. I. Adyaksana, C. A. Wicaksono, dan A. I. Ajiwinatama, “Improving employee performance with technology acceptance model approach,” Journal of Business and Information Systems, vol. 6, no. 1, pp. 72–84, 2024, doi: 10.36067/jbis.v6i1.226.',
+    'D. Marikyan dan S. Papagiannidis, “Task-Technology Fit: A Review,” in S. Papagiannidis, Ed., TheoryHub Book. Newcastle University, 2026. [Online]. Available: https://open.ncl.ac.uk/theories/3/task-technology-fit/.',
+    'I. Laeni, Nurfaizah, dan A. D. Pritama, “Metode Task Technology Fit pada Penilaian Tingkat Kepuasan Pengguna Sistem Informasi Perpustakaan,” FAHMA: Jurnal Informatika Komputer, Bisnis dan Manajemen, vol. 22, no. 1, pp. 31–39, 2024, doi: 10.61805/fahma.v22i1.108.',
+    'F. I. Armanda, F. Pradana, dan W. H. N. Putra, “Analisis Penerimaan Teknologi Sistem Informasi Manajemen Tugas Menggunakan Model Task Technology Fit (TTF),” Jurnal Teknologi Informasi dan Ilmu Komputer, vol. 12, no. 2, pp. 339–350, 2025, doi: 10.25126/jtiik.2025129414.',
+    'W. L. Y. Saptomo, I. Prasetyo, B. S. Nugroho, dan E. Rimawati, “Evaluasi Penerapan Aplikasi Sistem Keuangan Desa (Siskeudes ver. 2.0.3) dalam Peningkatan Kinerja Aparat Desa menggunakan Task Technology Fit,” Jurnal Ilmiah SINUS, vol. 20, no. 1, pp. 47–56, 2022, doi: 10.30646/sinus.v20i1.580.',
+    'Sugiyono, Metode Penelitian Kuantitatif, Kualitatif, dan R&D, edisi 2. Bandung: Alfabeta, 2020.',
+    'I. Ghozali, Aplikasi Analisis Multivariate dengan Program IBM SPSS 26, edisi 10. Semarang: Badan Penerbit Universitas Diponegoro, 2021.',
+    'N. I. Majdina, B. Pratikno, dan A. Tripena, “Penentuan Ukuran Sampel Menggunakan Rumus Bernoulli dan Slovin: Konsep dan Aplikasinya,” Jurnal Ilmiah Matematika dan Pendidikan Matematika, vol. 16, no. 1, pp. 73–84, 2024, doi: 10.20884/1.jmp.2024.16.1.11230.'
+  ];
+
+  /* Teks sitasi portal. Perbarui setelah naskah terbit (jurnal, volume, DOI). */
+  const SITASI = {
+    apa: 'Gea, A., & Limbong, A. (2026). Analisis penggunaan fitur Google Drive oleh mahasiswa UNAI menggunakan model TTF (Task-Technology Fit) [Naskah belum dipublikasikan]. Program Studi Sistem Informasi, Fakultas Teknologi Informasi, Universitas Advent Indonesia.',
+    bibtex: '@unpublished{gea2026ttf,\n  author    = {Gea, Asafati and Limbong, Albinur},\n  title     = {Analisis Penggunaan Fitur Google Drive oleh Mahasiswa UNAI Menggunakan Model TTF (Task-Technology Fit)},\n  year      = {2026},\n  school    = {Universitas Advent Indonesia},\n  note      = {Naskah belum dipublikasikan. Program Studi Sistem Informasi, Fakultas Teknologi Informasi}\n}'
+  };
+
+  const MENU = [
+    ['ringkasan', 'Ringkasan'], ['metodologi', 'Metodologi'], ['model', 'Model TTF'],
+    ['instrumen', 'Instrumen'], ['dashboard', 'Dashboard'], ['sitasi', 'Sitasi'], ['pustaka', 'Pustaka']
+  ];
+
+  /* ---------- Utilitas ---------- */
+  const $ = function (s, r) { return (r || document).querySelector(s); };
+  const fmtID = function (n, d) { return Number(n).toLocaleString('id-ID', { minimumFractionDigits: d || 0, maximumFractionDigits: d || 0 }); };
+  const esc = function (s) { return String(s).replace(/[&<>"']/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]; }); };
+  const escRe = function (s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); };
+  const warna = function (k) { return VARIABEL[k].warna; };
+  const ikon = function () { if (window.lucide) { try { lucide.createIcons(); } catch (e) {} } };
+
+  /* ---------- Navbar ---------- */
+  (function navbar() {
+    var d = $('#menu-desktop'), m = $('#menu-mobile-list');
+    MENU.forEach(function (it) {
+      d.insertAdjacentHTML('beforeend', '<li><a data-nav="' + it[0] + '" href="#' + it[0] + '" class="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-navy-800 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white">' + it[1] + '</a></li>');
+      m.insertAdjacentHTML('beforeend', '<li><a data-nav="' + it[0] + '" href="#' + it[0] + '" class="block rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800">' + it[1] + '</a></li>');
+    });
+    var btn = $('#btn-menu'), panel = $('#menu-mobile');
+    function tutup() { panel.classList.add('hidden'); btn.setAttribute('aria-expanded', 'false'); }
+    btn.addEventListener('click', function () {
+      var buka = panel.classList.toggle('hidden') === false;
+      btn.setAttribute('aria-expanded', String(buka));
+    });
+    m.addEventListener('click', function (e) { if (e.target.closest('a')) tutup(); });
+    window.addEventListener('resize', function () { if (window.innerWidth >= 1024) tutup(); });
+
+    // Sorot menu sesuai bagian yang sedang dilihat
+    if ('IntersectionObserver' in window) {
+      var aktif = function (id) {
+        document.querySelectorAll('[data-nav]').forEach(function (a) {
+          var on = a.getAttribute('data-nav') === id;
+          a.classList.toggle('text-navy-800', on); a.classList.toggle('dark:text-white', on);
+          a.classList.toggle('bg-navy-50', on); a.classList.toggle('dark:bg-slate-800', on);
+          if (on) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current');
+        });
+      };
+      var io = new IntersectionObserver(function (es) {
+        es.forEach(function (e) { if (e.isIntersecting) aktif(e.target.id); });
+      }, { rootMargin: '-35% 0px -55% 0px' });
+      MENU.forEach(function (it) { var el = document.getElementById(it[0]); if (el) io.observe(el); });
+    }
+  })();
+
+  /* ---------- Mode gelap ---------- */
+  var charts = {};
+  $('#btn-tema').addEventListener('click', function () {
+    var gelap = document.documentElement.classList.toggle('dark');
+    try { localStorage.setItem('tema-portal', gelap ? 'dark' : 'light'); } catch (e) {}
+    terapkanTemaGrafik();
+  });
+
+  /* ---------- KPI ---------- */
+  (function kpi() {
+    var D = DATA_PENELITIAN;
+    var data = [
+      ['users', 'Populasi mahasiswa aktif', fmtID(D.populasi), 'UNAI, semester ganjil 2026/2027'],
+      ['target', 'Target sampel awal', '317', 'Slovin, e = ' + fmtID(D.errorSlovin * 100) + '%'],
+      ['list-checks', 'Total butir kuesioner', String(D.totalButir), 'Likert 1–5, 5 variabel'],
+      ['percent', 'Taraf signifikansi', fmtID(D.tarafSignifikansi * 100) + '%', 'α = ' + fmtID(D.tarafSignifikansi, 2)]
+    ];
+    $('#kpi').innerHTML = data.map(function (k) {
+      return '<div class="stat-card rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-5">' +
+        '<span class="grid h-9 w-9 place-items-center rounded-lg bg-navy-50 text-navy-700 dark:bg-slate-800 dark:text-blue-400"><i data-lucide="' + k[0] + '" class="h-5 w-5"></i></span>' +
+        '<p class="mt-3 text-2xl font-extrabold text-navy-900 dark:text-white sm:text-3xl">' + k[2] + '</p>' +
+        '<p class="mt-0.5 text-sm font-medium text-slate-700 dark:text-slate-300">' + k[1] + '</p>' +
+        '<p class="text-xs text-slate-500 dark:text-slate-400">' + k[3] + '</p></div>';
+    }).join('');
+  })();
+
+  /* ---------- Kalkulator Slovin ---------- */
+  (function slovin() {
+    var N = DATA_PENELITIAN.populasi, E0 = DATA_PENELITIAN.errorSlovin * 100;
+    var s = $('#slovin-e'), out = $('#slovin-e-out'), box = $('#slovin-steps'), nEl = $('#slovin-n'), note = $('#slovin-note');
+    function hitung() {
+      var ePct = parseFloat(s.value), e = ePct / 100;
+      var penyebut = 1 + N * e * e;
+      var n = N / penyebut, nBulat = Math.ceil(n);
+      out.textContent = fmtID(ePct, ePct % 1 ? 1 : 0) + '%';
+      box.innerHTML =
+        '<div>n = ' + fmtID(N) + ' / [1 + ' + fmtID(N) + '(' + fmtID(e, 4) + ')²]</div>' +
+        '<div>n = ' + fmtID(N) + ' / [1 + ' + fmtID(N) + '(' + fmtID(e * e, 4) + ')]</div>' +
+        '<div>n = ' + fmtID(N) + ' / ' + fmtID(penyebut, 4) + '</div>' +
+        '<div>n = ' + fmtID(n, 2) + ' → dibulatkan ke atas</div>';
+      nEl.textContent = fmtID(nBulat);
+      note.textContent = (ePct === E0) ? 'Sesuai hitungan jurnal: N = ' + fmtID(N) + ', e = ' + fmtID(E0) + '%' : 'Simulasi: bukan target resmi penelitian';
+    }
+    s.addEventListener('input', hitung);
+    $('#slovin-reset').addEventListener('click', function () { s.value = E0; hitung(); });
+    hitung();
+  })();
+
+  /* ---------- Diagram model & detail variabel ---------- */
+  (function model() {
+    var pos = { TSK: [20, 45], TEC: [20, 215], TTF: [300, 128], UTL: [540, 128], US: [780, 128] };
+    var urut = ['TSK', 'TEC', 'TTF', 'UTL', 'US'];
+    var W = 170, H = 84;
+    var svg = urut.map(function (k) {
+      var p = pos[k], v = VARIABEL[k];
+      var n = BUTIR.filter(function (b) { return b.v === k; }).length;
+      return '<g class="node" data-var="' + k + '" tabindex="0" role="button" aria-label="' + esc(v.nama) + ' (' + k + '), ' + n + ' butir">' +
+        '<rect class="box fill-white dark:fill-slate-800" x="' + p[0] + '" y="' + p[1] + '" width="' + W + '" height="' + H + '" rx="14" stroke="' + v.warna + '" stroke-width="2.5"></rect>' +
+        '<rect x="' + p[0] + '" y="' + p[1] + '" width="8" height="' + H + '" rx="4" fill="' + v.warna + '"></rect>' +
+        '<text x="' + (p[0] + W / 2 + 4) + '" y="' + (p[1] + 36) + '" text-anchor="middle" font-size="22" font-weight="800" class="fill-slate-900 dark:fill-white">' + k + '</text>' +
+        '<text x="' + (p[0] + W / 2 + 4) + '" y="' + (p[1] + 58) + '" text-anchor="middle" font-size="12.5" class="fill-slate-600 dark:fill-slate-300">' + esc(v.nama.split(' (')[0]) + '</text>' +
+        '<text x="' + (p[0] + W / 2 + 4) + '" y="' + (p[1] + 74) + '" text-anchor="middle" font-size="11" class="fill-slate-500 dark:fill-slate-400">' + n + ' butir</text></g>';
+    }).join('');
+    $('#svg-nodes').innerHTML = svg;
+
+    // Versi HP: alur vertikal
+    var langkah = [['TSK', 'TEC'], ['TTF'], ['UTL'], ['US']];
+    var lab = ['H1 · H2', 'H3', 'H4'];
+    var mob = '';
+    langkah.forEach(function (grup, i) {
+      mob += '<div class="grid gap-2 ' + (grup.length > 1 ? 'grid-cols-2' : 'grid-cols-1') + '">' + grup.map(function (k) {
+        var n = BUTIR.filter(function (b) { return b.v === k; }).length;
+        return '<button type="button" class="node-m rounded-xl border-2 bg-white p-3 text-left shadow-sm transition hover:shadow-md dark:bg-slate-800" data-var="' + k + '" style="border-color:' + warna(k) + '">' +
+          '<span class="block text-lg font-extrabold">' + k + '</span><span class="block text-xs text-slate-600 dark:text-slate-300">' + esc(VARIABEL[k].nama.split(' (')[0]) + '</span><span class="block text-xs text-slate-500 dark:text-slate-400">' + n + ' butir</span></button>';
+      }).join('') + '</div>';
+      if (i < lab.length) mob += '<div class="flex items-center justify-center gap-2 py-2 text-sm font-bold text-blue-700 dark:text-blue-400"><i data-lucide="arrow-down" class="h-4 w-4"></i> ' + lab[i] + '</div>';
+    });
+    $('#diagram-mobile').innerHTML = mob;
+
+    function pilih(k) {
+      var v = VARIABEL[k];
+      var butir = BUTIR.filter(function (b) { return b.v === k; });
+      document.querySelectorAll('.node').forEach(function (g) { g.setAttribute('data-active', String(g.getAttribute('data-var') === k)); });
+      document.querySelectorAll('.node-m').forEach(function (g) { g.classList.toggle('ring-4', g.getAttribute('data-var') === k); g.classList.toggle('ring-blue-400/60', g.getAttribute('data-var') === k); });
+      var hip = v.hipotesis.map(function (h) {
+        var x = HIPOTESIS.filter(function (y) { return y.id === h; })[0];
+        return '<li><strong>' + h + '</strong>: ' + esc(x.dari) + ' → ' + esc(x.ke) + '</li>';
+      }).join('');
+      $('#detail-var').innerHTML =
+        '<div class="fade-up grid gap-5 lg:grid-cols-3">' +
+        '<div class="lg:col-span-1"><span class="inline-block rounded-full px-3 py-1 text-xs font-bold text-white" style="background:' + v.warna + '">' + k + ' · ' + v.peran + '</span>' +
+        '<h3 class="mt-3 text-xl font-bold text-navy-900 dark:text-white">' + esc(v.nama) + '</h3>' +
+        '<p class="mt-2 text-sm text-slate-700 dark:text-slate-300">' + esc(v.deskripsi) + '</p></div>' +
+        '<div class="lg:col-span-1"><p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Indikator (' + butir.length + ' butir)</p>' +
+        '<ul class="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-700 dark:text-slate-300">' + butir.map(function (b) { return '<li>' + esc(b.indikator) + ' <span class="text-xs text-slate-400">(no. ' + b.no + ')</span></li>'; }).join('') + '</ul></div>' +
+        '<div class="lg:col-span-1"><p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Persamaan regresi</p>' +
+        '<p class="mt-2 break-words rounded-lg bg-white p-3 font-mono text-xs leading-6 dark:bg-slate-900 sm:text-sm">' + esc(v.persamaan) + '</p>' +
+        '<p class="mt-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Hipotesis terkait</p>' +
+        '<ul class="mt-1 space-y-1 text-sm text-slate-700 dark:text-slate-300">' + hip + '</ul></div></div>';
+    }
+    document.addEventListener('click', function (e) { var n = e.target.closest('[data-var]'); if (n && (n.classList.contains('node') || n.classList.contains('node-m'))) pilih(n.getAttribute('data-var')); });
+    document.addEventListener('keydown', function (e) {
+      if ((e.key === 'Enter' || e.key === ' ') && e.target.classList && e.target.classList.contains('node')) { e.preventDefault(); pilih(e.target.getAttribute('data-var')); }
+    });
+    pilih('TTF');
+
+    $('#hipotesis').innerHTML = HIPOTESIS.map(function (h) {
+      return '<div class="stat-card flex gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">' +
+        '<span class="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-navy-800 text-sm font-extrabold text-white">' + h.id + '</span>' +
+        '<div><p class="text-sm font-medium text-slate-800 dark:text-slate-100">' + esc(h.teks) + '</p>' +
+        '<p class="mt-1 text-xs text-slate-500 dark:text-slate-400">' + esc(h.uji) + ' · α = 0,05</p></div></div>';
+    }).join('');
+  })();
+
+  /* ---------- Explorer instrumen ---------- */
+  (function instrumen() {
+    var filter = 'Semua', q = '';
+    var chips = ['Semua', 'TSK', 'TEC', 'TTF', 'UTL', 'US'];
+    var wrap = $('#filter-chips');
+    function renderChips() {
+      wrap.innerHTML = chips.map(function (c) {
+        var n = c === 'Semua' ? BUTIR.length : BUTIR.filter(function (b) { return b.v === c; }).length;
+        var on = c === filter;
+        return '<button type="button" data-f="' + c + '" aria-pressed="' + on + '" class="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition ' +
+          (on ? 'border-navy-800 bg-navy-800 text-white' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700') + '">' +
+          (c !== 'Semua' ? '<span class="h-2.5 w-2.5 rounded-full" style="background:' + warna(c) + '"></span>' : '') + c + ' <span class="text-xs opacity-75">' + n + '</span></button>';
+      }).join('');
+    }
+    function tandai(teks) {
+      var t = esc(teks);
+      if (!q) return t;
+      var re = new RegExp('(' + escRe(esc(q)) + ')', 'gi');
+      return t.replace(re, '<mark>$1</mark>');
+    }
+    function renderTabel() {
+      var ql = q.toLowerCase();
+      var hasil = BUTIR.filter(function (b) {
+        return (filter === 'Semua' || b.v === filter) && (!ql || (b.teks + ' ' + b.indikator + ' ' + VARIABEL[b.v].nama + ' ' + b.v).toLowerCase().indexOf(ql) > -1);
+      });
+      $('#jumlah-butir').textContent = 'Menampilkan ' + hasil.length + ' dari ' + BUTIR.length + ' butir';
+      $('#tabel-butir').innerHTML = hasil.length ? hasil.map(function (b) {
+        return '<div class="grid gap-1 bg-white px-4 py-3.5 text-sm odd:bg-white even:bg-slate-50/70 dark:odd:bg-slate-900 dark:even:bg-slate-900/50 md:grid-cols-[3rem_9rem_14rem_1fr] md:gap-4">' +
+          '<span class="font-bold text-navy-700 dark:text-blue-400"><span class="md:hidden">Butir </span>' + b.no + '</span>' +
+          '<span><span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold text-white" style="background:' + warna(b.v) + '">' + b.v + '</span></span>' +
+          '<span class="font-medium text-slate-800 dark:text-slate-100">' + tandai(b.indikator) + '</span>' +
+          '<span class="text-slate-600 dark:text-slate-300">' + tandai(b.teks) + '</span></div>';
+      }).join('') : '<p class="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">Tidak ada butir yang cocok. Ubah kata kunci atau filter.</p>';
+    }
+    wrap.addEventListener('click', function (e) { var b = e.target.closest('[data-f]'); if (b) { filter = b.getAttribute('data-f'); renderChips(); renderTabel(); } });
+    $('#cari').addEventListener('input', function (e) { q = e.target.value.trim(); renderTabel(); });
+    renderChips(); renderTabel();
+  })();
+
+  /* ---------- Dashboard (Chart.js) ---------- */
+  function warnaTema() {
+    var g = document.documentElement.classList.contains('dark');
+    return { teks: g ? '#cbd5e1' : '#334155', grid: g ? 'rgba(148,163,184,.18)' : 'rgba(100,116,139,.18)', ambang: g ? '#f87171' : '#dc2626' };
+  }
+  function terapkanTemaGrafik() {
+    if (!window.Chart) return;
+    var c = warnaTema();
+    Chart.defaults.color = c.teks;
+    Object.keys(charts).forEach(function (k) {
+      var ch = charts[k], o = ch.options;
+      if (o.scales) Object.keys(o.scales).forEach(function (a) {
+        var s = o.scales[a];
+        if (s.grid) s.grid.color = c.grid;
+        if (s.ticks) s.ticks.color = c.teks;
+        if (s.title) s.title.color = c.teks;
+        if (s.angleLines) s.angleLines.color = c.grid;
+        if (s.pointLabels) s.pointLabels.color = c.teks;
+        if (s.ticks && a === 'r') s.ticks.backdropColor = 'transparent';
+      });
+      if (o.plugins && o.plugins.legend && o.plugins.legend.labels) o.plugins.legend.labels.color = c.teks;
+      ch.update('none');
+    });
+  }
+
+  (function dashboard() {
+    var D = DATA_PENELITIAN, sim = D.statusSimulasi;
+    $('#status-data').innerHTML = sim
+      ? '<i data-lucide="flask-conical" class="h-4 w-4"></i> Status: Menunggu Pengumpulan Data Empiris (Simulasi)'
+      : '<i data-lucide="badge-check" class="h-4 w-4"></i> Status: Data empiris hasil olah SPSS';
+    if (!sim) {
+      $('#status-data').className = 'inline-flex w-fit items-center gap-2 rounded-full border border-emerald-400/60 bg-emerald-50 px-4 py-1.5 text-xs font-semibold text-emerald-900 dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-200';
+      $('#banner-simulasi').classList.add('hidden');
+    }
+    var sufiks = sim ? ' (simulasi)' : '';
+    var urut = ['TSK', 'TEC', 'TTF', 'UTL', 'US'];
+
+    // tabel uji hipotesis
+    $('#tag-uji').textContent = sim ? 'SIMULASI' : 'HASIL SPSS';
+    $('#tag-uji').className = sim ? 'rounded bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-900 dark:bg-amber-500/20 dark:text-amber-200' : 'rounded bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-900 dark:bg-emerald-500/20 dark:text-emerald-200';
+    $('#tabel-uji').innerHTML = HIPOTESIS.map(function (h) {
+      var d = D.hipotesis[h.id], ok = d.p < D.tarafSignifikansi;
+      return '<tr><td class="px-5 py-3 font-bold text-navy-800 dark:text-blue-300">' + h.id + '</td>' +
+        '<td class="whitespace-nowrap px-5 py-3">' + h.dari + ' → ' + h.ke + '</td>' +
+        '<td class="px-5 py-3 tabular-nums">' + fmtID(d.beta, 2) + '</td>' +
+        '<td class="whitespace-nowrap px-5 py-3 tabular-nums">' + (d.p < 0.001 ? '&lt; 0,001' : fmtID(d.p, 3)) + '</td>' +
+        '<td class="px-5 py-3"><span class="rounded-full px-2.5 py-0.5 text-xs font-semibold ' + (ok ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-200' : 'bg-rose-100 text-rose-800 dark:bg-rose-500/20 dark:text-rose-200') + '">' + (ok ? 'Didukung' : 'Tidak didukung') + sufiks + '</span></td></tr>';
+    }).join('');
+
+    if (!window.Chart) {
+      document.querySelectorAll('.chart-box').forEach(function (b) { b.innerHTML = '<p class="grid h-full place-items-center text-center text-sm text-slate-500">Grafik tidak dapat dimuat. Periksa koneksi internet.</p>'; });
+      return;
+    }
+    var c = warnaTema();
+    Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
+    Chart.defaults.color = c.teks;
+    var umum = { responsive: true, maintainAspectRatio: false };
+
+    charts.rata = new Chart($('#grafik-rata'), {
+      type: 'bar',
+      data: { labels: urut, datasets: [{ label: 'Rata-rata skor' + sufiks, data: urut.map(function (k) { return D.rataRata[k]; }), backgroundColor: urut.map(warna), borderRadius: 8, maxBarThickness: 56 }] },
+      options: Object.assign({}, umum, {
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: function (x) { return ' ' + fmtID(x.parsed.y, 2) + ' dari 5' + sufiks; } } } },
+        scales: { y: { min: 1, max: 5, ticks: { stepSize: 1, color: c.teks }, grid: { color: c.grid }, title: { display: true, text: 'Skor Likert', color: c.teks } }, x: { ticks: { color: c.teks }, grid: { display: false } } }
+      })
+    });
+
+    charts.alpha = new Chart($('#grafik-alpha'), {
+      type: 'radar',
+      data: { labels: urut, datasets: [
+        { label: 'Cronbach’s Alpha' + sufiks, data: urut.map(function (k) { return D.cronbachAlpha[k]; }), borderColor: '#2563eb', backgroundColor: 'rgba(37,99,235,.22)', pointBackgroundColor: '#2563eb', borderWidth: 2 },
+        { label: 'Batas ' + fmtID(D.batasAlpha, 2), data: urut.map(function () { return D.batasAlpha; }), borderColor: c.ambang, borderDash: [6, 4], pointRadius: 0, fill: false, borderWidth: 2 }
+      ] },
+      options: Object.assign({}, umum, {
+        plugins: { legend: { position: 'bottom', labels: { color: c.teks, boxWidth: 14 } } },
+        scales: { r: { min: 0.5, max: 1, ticks: { stepSize: 0.1, color: c.teks, backdropColor: 'transparent', callback: function (v) { return fmtID(v, 1); } }, grid: { color: c.grid }, angleLines: { color: c.grid }, pointLabels: { color: c.teks, font: { weight: '600' } } } }
+      })
+    });
+
+    charts.r2 = new Chart($('#grafik-r2'), {
+      type: 'bar',
+      data: { labels: [['Persamaan 1', 'TSK, TEC → TTF'], ['Persamaan 2', 'TTF → UTL'], ['Persamaan 3', 'UTL → US']],
+        datasets: [{ label: 'R²' + sufiks, data: [D.rKuadrat.persamaan1, D.rKuadrat.persamaan2, D.rKuadrat.persamaan3], backgroundColor: ['#4f46e5', '#0d9488', '#d97706'], borderRadius: 8, maxBarThickness: 64 }] },
+      options: Object.assign({}, umum, {
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: function (x) { return ' R² = ' + fmtID(x.parsed.y, 2) + sufiks; } } } },
+        scales: { y: { min: 0, max: 1, ticks: { color: c.teks, callback: function (v) { return fmtID(v, 1); } }, grid: { color: c.grid }, title: { display: true, text: 'R²', color: c.teks } }, x: { ticks: { color: c.teks }, grid: { display: false } } }
+      })
+    });
+  })();
+
+  /* ---------- Sitasi (salin ke clipboard) ---------- */
+  (function sitasi() {
+    var mode = 'apa', box = $('#kotak-sitasi'), ta = $('#tab-apa'), tb = $('#tab-bib');
+    function tampil() {
+      box.textContent = SITASI[mode === 'apa' ? 'apa' : 'bibtex'];
+      [[ta, 'apa'], [tb, 'bib']].forEach(function (p) {
+        var on = mode === p[1];
+        p[0].setAttribute('aria-selected', String(on));
+        p[0].className = 'rounded-md px-4 py-1.5 font-semibold transition ' + (on ? 'bg-navy-800 text-white' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700');
+      });
+    }
+    ta.addEventListener('click', function () { mode = 'apa'; tampil(); });
+    tb.addEventListener('click', function () { mode = 'bib'; tampil(); });
+    $('#btn-salin').addEventListener('click', function () {
+      var teks = box.textContent, label = $('#salin-label');
+      function ok() { label.textContent = 'Tersalin!'; setTimeout(function () { label.textContent = 'Salin sitasi'; }, 1800); }
+      function cadangan() {
+        var t = document.createElement('textarea'); t.value = teks; t.setAttribute('readonly', ''); t.style.position = 'fixed'; t.style.opacity = '0';
+        document.body.appendChild(t); t.select();
+        try { document.execCommand('copy'); ok(); } catch (e) { label.textContent = 'Gagal, salin manual'; }
+        document.body.removeChild(t);
+      }
+      if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(teks).then(ok, cadangan); else cadangan();
+    });
+    tampil();
+  })();
+
+  /* ---------- Modal PDF ---------- */
+  (function modal() {
+    var m = $('#modal-pdf'), buka = $('#btn-pdf'), tutup = $('#modal-tutup');
+    function show() { m.classList.remove('hidden'); m.classList.add('flex'); tutup.focus(); }
+    function hide() { m.classList.add('hidden'); m.classList.remove('flex'); buka.focus(); }
+    buka.addEventListener('click', show);
+    tutup.addEventListener('click', hide);
+    m.addEventListener('click', function (e) { if (e.target === m) hide(); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !m.classList.contains('hidden')) hide(); });
+  })();
+
+  /* ---------- Accordion daftar pustaka ---------- */
+  (function pustaka() {
+    var acc = $('#accordion');
+    acc.innerHTML = PUSTAKA.map(function (p, i) {
+      var judul = ((p.match(/“([^”]+)”/) || [])[1] || p.split('. ')[1] || p.slice(0, 70)).replace(/[,.]\s*$/, '');
+      var id = 'pus-' + (i + 1);
+      return '<div class="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">' +
+        '<h3><button type="button" class="flex w-full items-center gap-3 px-4 py-3.5 text-left hover:bg-slate-50 dark:hover:bg-slate-800/60" aria-expanded="false" aria-controls="' + id + '">' +
+        '<span class="grid h-8 w-10 shrink-0 place-items-center rounded-md bg-navy-50 text-xs font-bold text-navy-800 dark:bg-slate-800 dark:text-blue-300">[' + (i + 1) + ']</span>' +
+        '<span class="flex-1 text-sm font-medium text-slate-800 dark:text-slate-100">' + esc(judul) + '</span>' +
+        '<i data-lucide="chevron-down" class="h-4 w-4 shrink-0 text-slate-500 transition-transform"></i></button></h3>' +
+        '<div class="acc-panel" id="' + id + '" data-open="false" role="region"><div><p class="border-t border-slate-200 px-4 py-3.5 text-sm leading-relaxed text-slate-600 dark:border-slate-800 dark:text-slate-300">' + esc(p) + '</p></div></div></div>';
+    }).join('');
+    function set(btn, buka) {
+      btn.setAttribute('aria-expanded', String(buka));
+      var panel = document.getElementById(btn.getAttribute('aria-controls'));
+      panel.setAttribute('data-open', String(buka));
+      var ic = btn.querySelector('svg, i'); if (ic) ic.style.transform = buka ? 'rotate(180deg)' : '';
+    }
+    acc.addEventListener('click', function (e) {
+      var b = e.target.closest('button[aria-controls]'); if (!b) return;
+      set(b, b.getAttribute('aria-expanded') !== 'true');
+    });
+    $('#pustaka-buka').addEventListener('click', function () { acc.querySelectorAll('button[aria-controls]').forEach(function (b) { set(b, true); }); });
+    $('#pustaka-tutup').addEventListener('click', function () { acc.querySelectorAll('button[aria-controls]').forEach(function (b) { set(b, false); }); });
+  })();
+
+  $('#tahun').textContent = new Date().getFullYear();
+  ikon();
+  terapkanTemaGrafik();
+  </script>
+</body>
+</html>
